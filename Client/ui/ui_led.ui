@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Led</class>
+ <widget class="QWidget" name="Led">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>408</width>
+    <height>275</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>3ds</family>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Led</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+background:#484848;
+}
+QAbstractButton{
+border-style:0px;
+border-radius:0px;
+color:#DCDCDC;
+background:qlineargradient(spread:pad,x1:0,y1:0,x2:0,y2:1,stop:0 #858585,stop:1 #383838);
+}
+QAbstractButton:hover{
+color:#000000;
+background-color:#008aff;
+}
+QAbstractButton:pressed{
+color:#DCDCDC;
+border-style:solid;
+border-width:0px 0px 0px 4px;
+border-color:#008aff;
+background-color:#444444;
+}
+QLabel{
+color:#DCDCDC;
+}
+QLabel:focus{
+border:1px solid #00BB9E;
+}
+QLineEdit{
+border:1px solid #242424;
+border-radius:3px;
+background:none;
+selection-background-color:#484848;
+selection-color:#DCDCDC;
+}
+QLineEdit:focus,QLineEdit:hover{
+border:1px solid #242424;
+}
+QLineEdit{
+border:1px solid #242424;
+border-radius:3px;
+background:none;
+selection-background-color:#484848;
+selection-color:#DCDCDC;
+}
+QLineEdit:focus,QLineEdit:hover{
+border:1px solid #242424;
+}
+QLineEdit{
+lineedit-password-character:9679;
+}
+QSlider::sub-page:horizontal{
+height:8px;
+border-radius:3px;
+background:#008aff;
+}
+QGroupBox::title {
+pading:2px;
+color:white;
+subcontrol-position: top center;
+border-top:0px ;} </string>
+  </property>
+  <widget class="QWidget" name="widget_Led_Color_Disk" native="true">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>30</y>
+     <width>201</width>
+     <height>241</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>3ds</family>
+    </font>
+   </property>
+   <property name="focusPolicy">
+    <enum>Qt::NoFocus</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_Led_Brightness">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>240</y>
+     <width>70</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>3ds</family>
+     <pointsize>10</pointsize>
+     <weight>50</weight>
+     <italic>false</italic>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="text">
+    <string>Brightness</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QSlider" name="verticalSlider_Led_Brightness">
+   <property name="geometry">
+    <rect>
+     <x>355</x>
+     <y>50</y>
+     <width>22</width>
+     <height>181</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>3ds</family>
+    </font>
+   </property>
+   <property name="maximum">
+    <number>255</number>
+   </property>
+   <property name="value">
+    <number>50</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit_Led_Brightness">
+   <property name="geometry">
+    <rect>
+     <x>345</x>
+     <y>10</y>
+     <width>41</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>3ds</family>
+     <pointsize>10</pointsize>
+     <weight>50</weight>
+     <italic>false</italic>
+     <bold>false</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>50</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QSplitter" name="splitter">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>50</y>
+     <width>81</width>
+     <height>221</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+   <widget class="QRadioButton" name="radioButton_Led_Mode_Off">
+    <property name="font">
+     <font>
+      <family>3ds</family>
+     </font>
+    </property>
+    <property name="text">
+     <string>OFF</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_Led_Mode_RGB">
+    <property name="font">
+     <font>
+      <family>3ds</family>
+     </font>
+    </property>
+    <property name="text">
+     <string>RGB</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_Led_Mode_Following">
+    <property name="font">
+     <font>
+      <family>3ds</family>
+     </font>
+    </property>
+    <property name="text">
+     <string>Following</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_Led_Mode_Blink">
+    <property name="font">
+     <font>
+      <family>3ds</family>
+     </font>
+    </property>
+    <property name="text">
+     <string>Blink</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_Led_Mode_Breathing">
+    <property name="font">
+     <font>
+      <family>3ds</family>
+     </font>
+    </property>
+    <property name="text">
+     <string>Breathing</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_Led_Mode_Rainbow">
+    <property name="font">
+     <font>
+      <family>3ds</family>
+     </font>
+    </property>
+    <property name="text">
+     <string>Rainbow</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButton_Led_Mode_Gradient">
+    <property name="font">
+     <font>
+      <family>3ds</family>
+     </font>
+    </property>
+    <property name="text">
+     <string>Gradient</string>
+    </property>
+    <property name="checkable">
+     <bool>true</bool>
+    </property>
+    <property name="checked">
+     <bool>false</bool>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QSplitter" name="splitter_2">
+   <property name="geometry">
+    <rect>
+     <x>11</x>
+     <y>10</y>
+     <width>311</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>3ds</family>
+    </font>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <widget class="QLabel" name="label_Led_Color_Disk">
+    <property name="font">
+     <font>
+      <family>3ds</family>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Led_Color_R">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="font">
+     <font>
+      <family>3ds</family>
+      <pointsize>10</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>255</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Led_Color_G">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="font">
+     <font>
+      <family>3ds</family>
+      <pointsize>10</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>255</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_Led_Color_B">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="font">
+     <font>
+      <family>3ds</family>
+      <pointsize>10</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>0</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
