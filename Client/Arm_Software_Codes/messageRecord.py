@@ -19,13 +19,12 @@ class MessageRecord:
         }
         self.fileInit()
 
-    # 指定文件删除函数
     def deleteFile(self, file_path):
         try:
             os.remove(file_path)
         except OSError as e:
             print(f"The file '{e}' was not successfully deleted.")
-    # 文件初始化函数，如果文件存在，且文件的对象个数和self.python_data的对象数目相等，则直接读取本地文件。对象数目不相等，或者文件不存在，则直接新建并写入json文件
+  
     def fileInit(self):
         if os.path.exists("Parameter.json") is True:
             with open("Parameter.json", "r", encoding='utf-8') as fp:
@@ -37,22 +36,22 @@ class MessageRecord:
                     self.writeJsonFile()
         else:
             self.writeJsonFile()
-    # 读取本地json文件，并将参数赋值给self.python_data
+
     def readJsonFile(self):
-        with open("Parameter.json", "r", encoding='utf-8') as fp:  # 以读的方式打开文件，执行操作后会自动关闭文件
+        with open("Parameter.json", "r", encoding='utf-8') as fp:  
             self.python_data = json.load(fp)
-    # 将self.python_data转码为json格式，并写入本地json文件
+
     def writeJsonFile(self):
-        with open("Parameter.json", "w", encoding='utf-8') as fp:  # 以写的方式打开文件，执行操作后会自动关闭文件
+        with open("Parameter.json", "w", encoding='utf-8') as fp:  
             json.dump(self.python_data, fp, indent=4)
-    # 读取本地json文件中，任意一个对象的参数信息
+
     def readJsonObject(self, objectName):
         #self.readJsonFile()
         try:
             return self.python_data[str(objectName)]
         except:
             print(f"Read the Json: '{objectName}' does not exist.")
-    # 给self.python_data中任意对象赋值，并写入本地json文件
+
     def writeJsonObject(self, objectName, data):
         try:
             self.python_data[str(objectName)] = data

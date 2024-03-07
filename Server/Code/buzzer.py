@@ -38,6 +38,7 @@ if __name__ == '__main__':
     import os
     import sys
     os.system("sudo pigpiod")
+    time.sleep(1)
     B=Buzzer() 
     try:
         if len(sys.argv)==1:

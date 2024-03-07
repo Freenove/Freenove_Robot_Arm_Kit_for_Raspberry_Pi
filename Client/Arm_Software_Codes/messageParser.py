@@ -10,16 +10,16 @@ class MessageParser:
         self.commandChar = None
         
     def parser(self, msg):
-        self.clearParameters()                                          #清空命令解析数组
-        inputStringTemp = msg.strip()                                   #删除头尾空格
-        self.inputCommandArray = inputStringTemp.split(" ")             #将指令按空格拆分开并存进list
-        for i in self.inputCommandArray:                                #将列表元素解析并存入不同的list中
+        self.clearParameters()                                         
+        inputStringTemp = msg.strip()                                 
+        self.inputCommandArray = inputStringTemp.split(" ")            
+        for i in self.inputCommandArray:                          
             self.commandArray.append(i[0:1])
             self.stringParameter.append(i[1:])
-        self.commandChar = self.commandArray[0][0:1]                    #取命令第一个字节
+        self.commandChar = self.commandArray[0][0:1]                   
         try:
-            self.floatParameter = [float(x) for x in self.stringParameter]  #将参数全部转化为浮点型
-            self.intParameter = [round(x) for x in self.floatParameter]     #将参数全部转化为整形
+            self.floatParameter = [float(x) for x in self.stringParameter]  
+            self.intParameter = [round(x) for x in self.floatParameter]    
         except:
             pass
         

@@ -12,7 +12,7 @@ class LedPixel:
         #Control the sending order of color data
         self.ORDER = "RGB"  
         # LED strip configuration:
-        LED_COUNT      = 8      # Number of LED pixels.
+        LED_COUNT      = 8       # Number of LED pixels.
         LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
         LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
         LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
@@ -24,14 +24,14 @@ class LedPixel:
         # Intialize the library (must be called once before other functions).
         self.strip.begin()
     
-    #根据颜色类型，返回正确的颜色数据
+    #Returns the correct color data based on the color type
     def LED_TYPR(self, R, G, B):
         Led_type = ["GRB", "GBR", "RGB", "RBG", "BRG", "BGR"]
         color = [Color(G, R, B), Color(G, B, R), Color(R, G, B), Color(R, B, G), Color(B, R, G), Color(B, G, R)]
         if self.ORDER in Led_type:
             return color[Led_type.index(self.ORDER)]
             
-    #逐个设置彩灯并显示效果
+    #Set the lights one by one and display
     def colorWipe(self, color, wait_ms=50, interval_ms=1000):
         self.strip.setBrightness(255)
         colorShow = self.LED_TYPR(color[0], color[1], color[2])
@@ -41,7 +41,7 @@ class LedPixel:
             time.sleep(wait_ms/1000.0)
         time.sleep(interval_ms/1000.0)
 
-    #自定义RGB灯
+    #Custom RGB
     def RGBLed(self, color, wait_ms=100):
         self.strip.setBrightness(255)
         colorShow = self.LED_TYPR(color[0], color[1], color[2])
@@ -50,8 +50,8 @@ class LedPixel:
         self.strip.show()
         time.sleep(wait_ms/1000.0)
 
-    #流水灯
-    def followingLed(self, color, wait_ms=50):
+    #Following lights
+    def followingLed(self, color, wait_ms=60):
         self.strip.setBrightness(255)
         ledShow = [self.LED_TYPR(color[0]//8, color[1]//8, color[2]//8), 
                self.LED_TYPR(color[0]//4, color[1]//4, color[2]//4), 
@@ -66,7 +66,7 @@ class LedPixel:
             self.strip.show()
             time.sleep(wait_ms/1000.0)
 
-    #闪烁
+    #Blink lights
     def blinkLed(self, color, wait_ms=300):
         self.strip.setBrightness(255)
         colorShow = self.LED_TYPR(color[0], color[1], color[2])
@@ -79,7 +79,7 @@ class LedPixel:
         self.strip.show()
         time.sleep(wait_ms/1000.0)
         
-    #呼吸灯        
+    #Breathing lights      
     def breathLight(self, color, wait_ms=15):
         colorShow = self.LED_TYPR(color[0], color[1], color[2])
         for i in range(8):
@@ -93,7 +93,7 @@ class LedPixel:
             self.strip.show()
             time.sleep(wait_ms/1000.0)
     
-    #色盘取色
+    #Color palette
     def wheel(self, pos):
         """Generate rainbow colors across 0-255 positions."""
         if pos<0 or pos >255:
@@ -114,7 +114,7 @@ class LedPixel:
             b=255 - pos * 3
         return self.LED_TYPR(r,g,b)
 
-    #彩虹色旋转灯
+    #Rainbow light
     def rainbowCycle(self, wait_ms=3, iterations=1):
         self.strip.setBrightness(50)
         """Draw rainbow that uniformly distributes itself across all pixels."""
@@ -124,7 +124,7 @@ class LedPixel:
             self.strip.show()
             time.sleep(wait_ms/1000.0)
 
-    #渐变彩虹色灯
+    #Gradient rainbow light
     def gradualChange(self, wait_ms=10, iterations=1):
         self.strip.setBrightness(50)
         """Draw rainbow that fades across all pixels at once."""
@@ -134,7 +134,7 @@ class LedPixel:
             self.strip.show()
             time.sleep(wait_ms/1000.0)
 
-    #可自定义的彩灯旋转
+    #Rotating lights can be customed
     def rotateLed(self, color, number=2, wait_ms=50):
         self.strip.setBrightness(255)
         colorShow = self.LED_TYPR(color[0], color[1], color[2])
@@ -147,29 +147,29 @@ class LedPixel:
             self.strip.show()
             time.sleep(wait_ms/1000.0)
     
-    #彩灯显示函数，需要使用一个线程循环执行它。data包含4个参数，0:mode, 1:R, 2:G, 3:B
+    #The colored light displays the function, which needs to be executed using a thread loop. data contains four parameters, 0:mode, 1:R, 2:G, and 3:B
     def light(self, data):
         self.LedMod=data[0]
         for i in range(3):
             self.color[i]=int(data[i+1]%256)
-        if self.LedMod==0:                                                    #关闭彩灯
+        if self.LedMod==0:                                                    #close
             self.color = [0,0,0]
             self.colorWipe(self.color)
         elif self.LedMod==1:                                                  #RGB
             self.RGBLed(self.color)
-        elif self.LedMod==2:                                                  #流水灯
+        elif self.LedMod==2:                                                  #Following
             self.followingLed(self.color)
-        elif self.LedMod==3:                                                  #闪烁
+        elif self.LedMod==3:                                                  #Blink
             self.blinkLed(self.color)
-        elif self.LedMod==4:                                                  #呼吸灯
+        elif self.LedMod==4:                                                  #Breathing
             self.breathLight(self.color)
-        elif self.LedMod==5:                                                  #彩虹灯
+        elif self.LedMod==5:                                                  #Rainbow
             self.rainbowCycle()
-        elif self.LedMod==6:                                                  #渐变灯
+        elif self.LedMod==6:                                                  #Gradual
             self.gradualChange()
-        elif self.LedMod==7:                                                  #两个灯旋转
+        elif self.LedMod==7:                                                  #The two lights rotate symmetrically
             self.rotateLed(self.color, 2, 50)
-        elif self.LedMod==8:                                                  #四个灯旋转
+        elif self.LedMod==8:                                                  #The four lights rotate symmetrically
             self.rotateLed(self.color, 4, 100)                                   
         elif self.LedMod>=9 or self.LedMod < 0:
             self.LedMod = 0

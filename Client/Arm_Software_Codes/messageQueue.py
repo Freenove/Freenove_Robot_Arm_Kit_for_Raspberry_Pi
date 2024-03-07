@@ -9,7 +9,7 @@ class MessageQueue:
     def get(self):
         if self.empty():
             return None
-        return self.items.pop(0) #返回消息队列的第一个数据
+        return self.items.pop(0) 
 
     def gets(self):
         if self.empty():
@@ -21,13 +21,13 @@ class MessageQueue:
             del self.items[index]
 
     def len(self):
-        return len(self.items)   #返回消息队列的长度
+        return len(self.items)  
 
     def empty(self):
-        return self.len() == 0   #数据为空则返回True
+        return self.len() == 0 
     
     def clear(self):
-        self.items.clear()       #清空消息队列
+        self.items.clear()      
         
 if __name__ == '__main__':
     myQueue = MessageQueue()

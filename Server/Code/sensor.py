@@ -2,10 +2,8 @@
 #!/usr/bin/env python
 
 import pigpio
-import time
 
-
-class TCRT5000: #传感器类
+class TCRT5000: 
     def __init__(self):
         self.TCRT5000_PIN = [8,11,7]
         self.tcrt5000 = pigpio.pi()
@@ -23,13 +21,12 @@ class TCRT5000: #传感器类
         s2 = self.readTCRT5000S2()
         s3 = self.readTCRT5000S3()
         return [s1,s2,s3]
-
         
 if __name__ == '__main__':
     import os
-    #import buzzer
+    import time
     os.system("sudo pigpiod")
-    #beep = buzzer.Buzzer()
+    time.sleep(1)
     current_state = [0,0,0]
     sensor_count = [0,0,0]
     sensor = TCRT5000()
@@ -45,7 +42,6 @@ if __name__ == '__main__':
                     sensor_count[0] = sensor_count[0] + 1
                 if sensor_count[0] >= 2:
                     sensor_count[0] = 0
-                    #beep.buzzerRunXms(2000,100,1) 
                     print("Sensor 1 is triggered.")
             elif current_state[1] != sensor_state[1]:
                 time.sleep(0.1)
@@ -55,7 +51,6 @@ if __name__ == '__main__':
                     sensor_count[1] = sensor_count[1] + 1
                 if sensor_count[1] >= 2:
                     sensor_count[1] = 0
-                    #beep.buzzerRunXms(2000,100,2) 
                     print("Sensor 2 is triggered.")
             elif current_state[2] != sensor_state[2]:
                 time.sleep(0.1)
@@ -65,11 +60,9 @@ if __name__ == '__main__':
                     sensor_count[2] = sensor_count[2] + 1
                 if sensor_count[2] >= 2:
                     sensor_count[2] = 0
-                    #beep.buzzerRunXms(2000,100,3) 
                     print("Sensor 3 is triggered.")
             else:
                 time.sleep(0.3)
-
     except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be  executed.
         pass
 

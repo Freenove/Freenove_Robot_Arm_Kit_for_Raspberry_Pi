@@ -8,29 +8,25 @@ from ui.ui_parameter import Ui_Parameter
 from messageRecord import MessageRecord
 
 class Configuration(QtWidgets.QWidget, Ui_Parameter):
-    # 定义一个信号通道，用来接受配置界面返回来的ip地址
     position_axis_channel = QtCore.pyqtSignal(str)
     send_cmd_channel = QtCore.pyqtSignal(str)
 
-    #def __init__(self, client):
     def __init__(self):
         super(Configuration, self).__init__()
         self.setupUi(self)
         self.setFixedSize(713, 483)
 
-        # 添加界面的logo
-        self.setWindowIcon(QIcon('./picture/Freenove.ico'))  # 添加窗口logo
-        #self.client = client
+        self.setWindowIcon(QIcon('./picture/Freenove.ico')) 
         self.cmd = Command()
         self.record = MessageRecord()
-        self.z_original_height_value = 75     # 夹具末端z值
+        self.z_original_height_value = 75    
         self.lineEdit_Parameter_Axis = [[self.lineEdit_Parameter_Axis_X_0, self.lineEdit_Parameter_Axis_Y_0, self.lineEdit_Parameter_Axis_Z_0],
                                         [self.lineEdit_Parameter_Axis_X_1, self.lineEdit_Parameter_Axis_Y_1, self.lineEdit_Parameter_Axis_Z_1],
                                         [self.lineEdit_Parameter_Axis_X_2, self.lineEdit_Parameter_Axis_Y_2, self.lineEdit_Parameter_Axis_Z_2],
                                         [self.lineEdit_Parameter_Axis_X_3, self.lineEdit_Parameter_Axis_Y_3, self.lineEdit_Parameter_Axis_Z_3],
                                         [self.lineEdit_Parameter_Axis_X_4, self.lineEdit_Parameter_Axis_Y_4, self.lineEdit_Parameter_Axis_Z_4]]
 
-        self.position_axis = [0.0, 200.0, self.z_original_height_value]      #中心点高度
+        self.position_axis = [0.0, 200.0, self.z_original_height_value]     
         self.original_axis = [[0.0, 200.0, self.z_original_height_value],
                               [-100.0, 200.0, self.z_original_height_value],
                               [100.0, 200.0, self.z_original_height_value],
@@ -41,44 +37,40 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
                                 [0.0, 0.0, 0.0],
                                 [0.0, 0.0, 0.0],
                                 [0.0, 0.0, 0.0]]
-        self.radioButton_axis_flag = 0         # 记录当前选择哪一个checkbox
-        self.load_configuration_ui()           # 加载参数，消耗了1秒
-        self.set_radioButton_color(0)          # 设置Point 0行显黄色
-        self.connect()                         # 信号与槽函数，消耗了1秒多
+        self.radioButton_axis_flag = 0         
+        self.load_configuration_ui()         
+        self.set_radioButton_color(0)         
+        self.connect()                        
 
-    # 加载界面参数
     def load_configuration_ui(self):
-        value = self.record.read_ground_height()                                         # 获取机械臂转轴高度
-        self.lineEdit_Parameter_Axis_Height.setText(str(value))                               # 显示机械臂转轴高度
-        self.horizontalSlider_Parameter_Axis_Height.setValue(round(float(value)*10))     # 设置转轴高度滑条
-        value = self.record.read_clamp_length()                                          # 获取夹具长度
-        self.lineEdit_Parameter_Clamp_Length.setText(str(value))                              # 显示夹具长度
-        self.horizontalSlider_Parameter_Clamp_Length.setValue(round(float(value)*10))    # 设置夹具长度
-        value = self.record.read_clamp_height()                                          # 获取夹具高度
-        self.lineEdit_Parameter_Clamp_Height.setText(str(value))                              # 显示夹具高度
-        self.horizontalSlider_Parameter_Clamp_Height.setValue(round(float(value)*10))    # 设置夹具高度
-        value = self.record.read_pen_height()                                            # 获取笔具高度
-        self.lineEdit_Parameter_Pen_Height.setText(str(value))                                 # 显示笔具高度
-        self.horizontalSlider_Parameter_Pen_Height.setValue(round(float(value)*10))      # 设置笔具滑条
+        value = self.record.read_ground_height()                                    
+        self.lineEdit_Parameter_Axis_Height.setText(str(value))                            
+        self.horizontalSlider_Parameter_Axis_Height.setValue(round(float(value)*10))  
+        value = self.record.read_clamp_length()                                         
+        self.lineEdit_Parameter_Clamp_Length.setText(str(value))                           
+        self.horizontalSlider_Parameter_Clamp_Length.setValue(round(float(value)*10))   
+        value = self.record.read_clamp_height()                                        
+        self.lineEdit_Parameter_Clamp_Height.setText(str(value))                          
+        self.horizontalSlider_Parameter_Clamp_Height.setValue(round(float(value)*10))  
+        value = self.record.read_pen_height()                                       
+        self.lineEdit_Parameter_Pen_Height.setText(str(value))                               
+        self.horizontalSlider_Parameter_Pen_Height.setValue(round(float(value)*10))    
         axis = [self.record.read_axis_point_1(), self.record.read_axis_point_2(), self.record.read_axis_point_3(), self.record.read_axis_point_4(), self.record.read_axis_point_5()]
         for i in range(5):
             for j in range(3):
-                self.calibrated_axis[i][j] = float(axis[i][j])                                 # 将从本地文件中读取到的数据更新给self.calibrated_axis
-                self.lineEdit_Parameter_Axis[i][j].setText(str(self.calibrated_axis[i][j]))    # 将从本地文件中读取到的数据加载到显示框中
+                self.calibrated_axis[i][j] = float(axis[i][j])                                 
+                self.lineEdit_Parameter_Axis[i][j].setText(str(self.calibrated_axis[i][j]))    
+        frequency = self.record.read_a4988_frequency()                                        
+        self.lineEdit_Parameter_Arm_Frequency.setText(str(frequency))                       
+        self.horizontalSlider_Parameter_Arm_Frequency.setValue(int(frequency)//50)           
 
-        frequency = self.record.read_a4988_frequency()                                         # 获取机械臂频率
-        self.lineEdit_Parameter_Arm_Frequency.setText(str(frequency))                          # 显示机械臂频率
-        self.horizontalSlider_Parameter_Arm_Frequency.setValue(int(frequency)//50)             # 设置机械臂频率滑条
-
-        self.position_axis = [float(self.record.read_position_point()[i]) for i in range(3)]   # 获取校准点数据
+        self.position_axis = [float(self.record.read_position_point()[i]) for i in range(3)]  
         self.label_Parameter_Default_Position_X.setText("X:" + str(self.position_axis[0]))
         self.label_Parameter_Default_Position_Y.setText("Y:" + str(self.position_axis[1]))
         self.label_Parameter_Default_Position_Z.setText("Z:" + str(self.position_axis[2]))
-
         for i in range(5):
-            self.original_axis[i][2] = float(self.position_axis[2])                       # 更新每个校准坐标的z轴数据
+            self.original_axis[i][2] = float(self.position_axis[2])                       
 
-    # 保存界面参数
     def save_configuration_ui(self):
         x = self.label_Parameter_Default_Position_X.text().split(":")[1]
         y = self.label_Parameter_Default_Position_Y.text().split(":")[1]
@@ -95,15 +87,12 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
         self.record.write_clamp_length(self.lineEdit_Parameter_Clamp_Length.text())
         self.record.write_clamp_height(self.lineEdit_Parameter_Clamp_Height.text())
 
-    # 控件信号与槽函数
     def connect(self):
-        #第一组框
         self.pushButton_Parameter_Adjust_Zero.clicked.connect(lambda: self.set_first_groupbox(self.pushButton_Parameter_Adjust_Zero))
         self.pushButton_Parameter_Zero_Point.clicked.connect(lambda: self.set_first_groupbox(self.pushButton_Parameter_Zero_Point))
         self.pushButton_Parameter_Default_Parameter.clicked.connect(lambda: self.set_first_groupbox(self.pushButton_Parameter_Default_Parameter))
         self.pushButton_Parameter_Default_Position.clicked.connect(lambda: self.set_first_groupbox(self.pushButton_Parameter_Default_Position))
-        self.pushButton_Parameter_Default_Position.clicked.connect(lambda: self.update_main_default_position)
-        #第二组框
+        self.pushButton_Parameter_Default_Position.clicked.connect(self.update_main_default_position)
         self.horizontalSlider_Parameter_Axis_Height.valueChanged.connect(lambda: self.set_second_groupbox(self.horizontalSlider_Parameter_Axis_Height))
         self.pushButton_Parameter_Axis_Height_Subtract.clicked.connect(lambda: self.set_second_groupbox(self.pushButton_Parameter_Axis_Height_Subtract))
         self.pushButton_Parameter_Axis_Height_Add.clicked.connect(lambda: self.set_second_groupbox(self.pushButton_Parameter_Axis_Height_Add))
@@ -116,7 +105,6 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
         self.horizontalSlider_Parameter_Pen_Height.valueChanged.connect(lambda: self.set_second_groupbox(self.horizontalSlider_Parameter_Pen_Height))
         self.pushButton_Parameter_Pen_Height_Subtract.clicked.connect(lambda: self.set_second_groupbox(self.pushButton_Parameter_Pen_Height_Subtract))
         self.pushButton_Parameter_Pen_Height_Add.clicked.connect(lambda: self.set_second_groupbox(self.pushButton_Parameter_Pen_Height_Add))
-        #第三组框
         self.radioButton_Parameter_Point_0.clicked.connect(lambda: self.select_third_checkbox(self.radioButton_Parameter_Point_0))
         self.radioButton_Parameter_Point_1.clicked.connect(lambda: self.select_third_checkbox(self.radioButton_Parameter_Point_1))
         self.radioButton_Parameter_Point_2.clicked.connect(lambda: self.select_third_checkbox(self.radioButton_Parameter_Point_2))
@@ -134,12 +122,10 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
         self.pushButton_Parameter_Axis_Y_Add.clicked.connect(lambda: self.set_third_groupbox(self.pushButton_Parameter_Axis_Y_Add))
         self.pushButton_Parameter_Axis_Z_Add.clicked.connect(lambda: self.set_third_groupbox(self.pushButton_Parameter_Axis_Z_Add))
         self.pushButton_Parameter_Axis_Save.clicked.connect(lambda: self.set_third_groupbox(self.pushButton_Parameter_Axis_Save))
-        #第四组框
         self.horizontalSlider_Parameter_Arm_Frequency.valueChanged.connect(lambda: self.set_fourth_groupbox(self.horizontalSlider_Parameter_Arm_Frequency))
-        #self.horizontalSlider_Parameter_Arm_Frequency.sliderReleased.connect(lambda: self.set_fourth_groupbox(self.horizontalSlider_Parameter_Arm_Frequency))
         self.pushButton_Parameter_Arm_Frequency_Subtract.clicked.connect(lambda: self.set_fourth_groupbox(self.pushButton_Parameter_Arm_Frequency_Subtract))
         self.pushButton_Parameter_Arm_Frequency_Add.clicked.connect(lambda: self.set_fourth_groupbox(self.pushButton_Parameter_Arm_Frequency_Add))
-    # 第一组框参数配置
+
     def set_first_groupbox(self, index):
         if index.objectName() == "pushButton_Parameter_Adjust_Zero":
             command = self.cmd.CUSTOM_ACTION + str("10") + self.cmd.DECOLLATOR_CHAR + self.cmd.ARM_SENSOR_POINT + str("0")
@@ -175,12 +161,11 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
             self.send_cmd(command)
             self.record.write_position_point(self.position_axis[0], self.position_axis[1], self.position_axis[2])
 
-    # 第二组框参数配置
     def set_second_groupbox(self, index):
         if index.objectName() == "horizontalSlider_Parameter_Axis_Height":
-            show_axis_height = round(self.horizontalSlider_Parameter_Axis_Height.value() * 0.1, 1)       #获取滑条值
-            self.lineEdit_Parameter_Axis_Height.setText(str(show_axis_height))                           #显示滑条值
-            self.record.write_ground_height(str(show_axis_height))                                         #写入本地
+            show_axis_height = round(self.horizontalSlider_Parameter_Axis_Height.value() * 0.1, 1)    
+            self.lineEdit_Parameter_Axis_Height.setText(str(show_axis_height))                          
+            self.record.write_ground_height(str(show_axis_height))                                         
         elif index.objectName() == "pushButton_Parameter_Axis_Height_Subtract":
             value = self.horizontalSlider_Parameter_Axis_Height.value() - 1
             if value < 0:
@@ -203,9 +188,9 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
             self.record.write_ground_height(str(show_axis_height))
 
         elif index.objectName() == "horizontalSlider_Parameter_Clamp_Length":
-            show_clamp_length = round(self.horizontalSlider_Parameter_Clamp_Length.value() * 0.1, 1)       #获取滑条值
-            self.lineEdit_Parameter_Clamp_Length.setText(str(show_clamp_length))                           #显示滑条值
-            self.record.write_clamp_length(str(show_clamp_length))                                         #写入本地
+            show_clamp_length = round(self.horizontalSlider_Parameter_Clamp_Length.value() * 0.1, 1)       
+            self.lineEdit_Parameter_Clamp_Length.setText(str(show_clamp_length))                          
+            self.record.write_clamp_length(str(show_clamp_length))                                      
 
         elif index.objectName() == "pushButton_Parameter_Clamp_Length_Subtract":
             value = self.horizontalSlider_Parameter_Clamp_Length.value() - 1
@@ -227,10 +212,9 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
                 show_clamp_length = round(value * 0.1, 1)
                 self.lineEdit_Parameter_Clamp_Length.setText(str(show_clamp_length))
                 self.record.write_clamp_length(str(show_clamp_length))
-
         elif index.objectName() == "horizontalSlider_Parameter_Clamp_Height":
-            show_clamp_height = round(self.horizontalSlider_Parameter_Clamp_Height.value() * 0.1, 1)       #获取滑条值
-            self.lineEdit_Parameter_Clamp_Height.setText(str(show_clamp_height))                           #显示滑条值
+            show_clamp_height = round(self.horizontalSlider_Parameter_Clamp_Height.value() * 0.1, 1)      
+            self.lineEdit_Parameter_Clamp_Height.setText(str(show_clamp_height))                         
             self.record.write_clamp_height(str(show_clamp_height))
             self.z_original_height_value = float(self.lineEdit_Parameter_Clamp_Height.text()) + float(self.lineEdit_Parameter_Pen_Height.text())
             self.position_axis[2] = round(self.z_original_height_value, 1)
@@ -307,7 +291,6 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
             for i in range(5):
                 self.original_axis[i][2] = round(self.z_original_height_value, 1)
 
-    # 设置调参框的颜色
     def set_radioButton_color(self, index):
         radioButton_sheet = "QLineEdit{\n" \
                          "border:1px solid #242424;\n" \
@@ -355,7 +338,7 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
                 self.lineEdit_Parameter_Axis[4][j].setStyleSheet("background-color: rgb(255, 238, 0);")
         elif index == 0:
             pass
-    # 设置checkbox，由第三组框的checkbox触发
+
     def select_third_checkbox(self, index):
         radio_state = index.isChecked()
         self.radioButton_Parameter_Point_0.setChecked(False)
@@ -393,7 +376,7 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
                 index.setChecked(True)
             else:
                 self.set_radioButton_color(0)
-    # 发送校准命令
+
     def send_calibrated_command(self, index):
         if index == 0:
             command = self.cmd.CUSTOM_ACTION + str("11") + self.cmd.DECOLLATOR_CHAR \
@@ -498,7 +481,6 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
             if self.radioButton_Parameter_Point_4.isChecked()==True:
                 self.send_cmd(command)
 
-    # 第三组框参数设置
     def set_third_groupbox(self, index):
         if index.objectName() == "radioButton_Parameter_Point_0":
             if index.isChecked() == True:
@@ -583,7 +565,6 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
             self.radioButton_axis_flag = -1
             self.set_radioButton_color(0)
 
-    # 第四组框参数设置
     def set_fourth_groupbox(self, index):
         if index.objectName() == "horizontalSlider_Parameter_Arm_Frequency":
             data = self.horizontalSlider_Parameter_Arm_Frequency.value() * 50
@@ -603,17 +584,14 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
             self.horizontalSlider_Parameter_Arm_Frequency.setValue(data)
             self.lineEdit_Parameter_Arm_Frequency.setText(str(data * 50))
 
-    #将指令通过信号通道发送出去
     def send_cmd(self, cmd):
         self.send_cmd_channel.emit(cmd)
 
-    #将坐标更新到主界面
     def update_main_default_position(self):
         axis = [str(self.position_axis[0]), str(self.position_axis[1]), str(self.position_axis[2]), str("0")]
         coordinate_str = f"{axis[0]},{axis[1]},{axis[2]},{axis[3]}"
         self.position_axis_channel.emit(coordinate_str)
 
-    # 窗口关闭事件
     def closeEvent(self, event):
         self.save_configuration_ui()
         axis = [str(self.position_axis[0]), str(self.position_axis[1]), str(self.position_axis[2]), str("1")]
@@ -626,13 +604,9 @@ def print_cmd(cmd):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-
-    #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #s.connect(("192.168.1.80", 5000))
-    #calibrationWindow = Configuration(s)
-
     calibrationWindow = Configuration()
     calibrationWindow.setWindowModality(Qt.ApplicationModal)
     calibrationWindow.show()
+    calibrationWindow.position_axis_channel.connect(print_cmd)
     calibrationWindow.send_cmd_channel.connect(print_cmd)
     sys.exit(app.exec_())

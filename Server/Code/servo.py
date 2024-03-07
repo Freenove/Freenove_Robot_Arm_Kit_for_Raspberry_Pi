@@ -8,20 +8,14 @@ class Servo:
     def __init__(self):
         self.SERVO_CHANNEL_PIN = [13,16,19,20,26] 
         self.servo_index = -1
-        
         self.PwmServo = pigpio.pi()
         self.initServo(self.servo_index)
-
-    def map(self, value, fromLow, fromHigh, toLow, toHigh):
-        return (toHigh-toLow)*(value-fromLow) / (fromHigh-fromLow) + toLow
-    
     def constrain(self, value, min, max):
         if value > max:
             value = max
         if value < min:
             value = min
         return value
-    
     def initServo(self, index):
         if self.servo_index != index:
             self.servo_index = self.constrain(index, 0, len(self.SERVO_CHANNEL_PIN))
@@ -32,7 +26,6 @@ class Servo:
                 self.PwmServo.set_mode(self.SERVO_CHANNEL_PIN[self.servo_index],pigpio.OUTPUT) 
                 self.PwmServo.set_PWM_frequency(self.SERVO_CHANNEL_PIN[self.servo_index],50)
                 self.PwmServo.set_PWM_range(self.SERVO_CHANNEL_PIN[self.servo_index], 20000)
-    
     def setServoAngle(self, index, angle):
         if index < len(self.SERVO_CHANNEL_PIN):
             self.initServo(index)
@@ -40,21 +33,17 @@ class Servo:
             servo_duty = 500+(2000/180)*angle
             self.PwmServo.set_PWM_dutycycle(self.SERVO_CHANNEL_PIN[self.servo_index], servo_duty)
             return servo_duty
-        
     def relaxServo(self, index):
         if index < len(self.SERVO_CHANNEL_PIN):
             self.PwmServo.set_PWM_dutycycle(self.SERVO_CHANNEL_PIN[self.servo_index], 20000)
-
-    
-
 
 # Main program logic follows:
 if __name__ == '__main__':
     import os
     import sys
     os.system("sudo pigpiod")
+    time.sleep(1)
     servo = Servo()
-    print("")
     try:
         while True:
             if len(sys.argv)==1:
