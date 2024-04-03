@@ -691,7 +691,7 @@ class ArmServer:
                 quese_count = self.queueAction.len()     #Gets the number of current robotic arm action message queues
                 cmd = self.cmd.CUSTOM_ACTION + str("12") + self.cmd.DECOLLATOR_CHAR + self.cmd.ARM_QUERY + str(quese_count) + str('\r\n')
                 self.serverSend(cmd)
-            time.sleep(0.5)
+            time.sleep(0.1)
     #Server check thread
     def threadingCheckServer(self):
         while self.threadings_state != 4:
