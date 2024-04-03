@@ -32,6 +32,9 @@ class Arm:
         self.end_axis_quadrant = 1
         self.point_quadrant_1 = 1
         self.point_quadrant_2 = 1
+        self.arm_limit_angle1 = [26, 150]
+        self.arm_limit_angle2 = [0, 110]
+        self.arm_limit_angle3 = [-12, 98]
     #mapping function
     def map(self, value, fromLow, fromHigh, toLow, toHigh):
         return ((toHigh-toLow)*(value-fromLow) / (fromHigh-fromLow) + toLow)
@@ -42,6 +45,41 @@ class Arm:
         if value < min:
             value = min
         return value
+    #Calculate the maximum drawing radius of the robotic arm
+    def calculate_y_value(self, z):
+        y_value = [80,220]
+        for y in range(50,200,1):
+            try:
+                axis = [0, 200-y, z]
+                angle = self.coordinateToAngle(axis)
+                angleA = 180-angle[1]-angle[2]
+                if self.arm_limit_angle1[0] < angleA < self.arm_limit_angle1[1]:
+                    if self.arm_limit_angle2[0] < angle[1] < self.arm_limit_angle2[1] and self.arm_limit_angle3[0] < angle[2] < self.arm_limit_angle3[1]:
+                        pass
+                    else:
+                        y_value[0] = 200 - y + 1
+                else:
+                     y_value[0] = 200 - y + 1
+                     break   
+            except:
+                pass
+        for y in range(250,400,1):
+            try:
+                axis = [0, y, z]
+                angle = self.coordinateToAngle(axis)
+                angleA = 180-angle[1]-angle[2]
+                if self.arm_limit_angle1[0] < angleA < self.arm_limit_angle1[1]:
+                    if self.arm_limit_angle2[0] < angle[1] < self.arm_limit_angle2[1] and self.arm_limit_angle3[0] < angle[2] < self.arm_limit_angle3[1]:
+                        pass
+                    else:
+                        y_value[1] = y - 1
+                else:
+                     y_value[1] = y - 1
+                     break   
+            except:
+                pass
+        return y_value
+
     #Determine whether a point is within a line segment formed by two other points
     def point_is_between_line(self, p1, p2, p3):
         x_state = 0
@@ -349,8 +387,8 @@ class Arm:
                     processing_axis.append(buf_value.copy())
             for i in range(len(processing_axis)):
                 angle = self.coordinateToAngle(processing_axis[i])                           
-                angle1 = [(self.offsetAngle[i] + angle[i]) for i in range(3)]
-                self.armDriver.moveStepMotorToTargetAngle(angle1)                          
+                angle1 = [(self.offsetAngle[i] + angle[i]) for i in range(3)]    # Deviation Angle calibration
+                self.armDriver.moveStepMotorToTargetAngle(angle1)                 
         self.last_x_offset = self.current_x_offset                                      
         self.last_y_offset = self.current_y_offset                                         
         self.last_z_offset = self.current_z_offset                                        
