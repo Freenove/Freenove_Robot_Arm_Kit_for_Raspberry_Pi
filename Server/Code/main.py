@@ -31,6 +31,7 @@ class ArmServer:
         self.queueLed = messageQueue.MessageQueue()                                                    #The message queue is used to store the control instructions of the colored lights
         self.queueBuzzer = messageQueue.MessageQueue()                                                 #Message queue, which is used to store buzzer instructions
         self.last_pozition = [0,0,0]
+        self.current_pozition = [0,0,0]
         self.plane_axis_state = [0,0,0,0,0,0]                                                          #It is used to temporarily store the calibration status of the robot arm
         self.calibration_height = 20                                                                   #Raise pen height in place when calibrating                                                          
         self.thread_led_parameter = [0,0,0,0]                                                          #Is used to store the mode and RGB color values of the color lights
@@ -148,6 +149,12 @@ class ArmServer:
             + self.cmd.AXIS_Y_ACTION + str(axis[1]) + self.cmd.DECOLLATOR_CHAR \
             + self.cmd.AXIS_Z_ACTION + str(axis[2])
         self.queueAction.put(cmd)
+    #Send the motion range of painting mode.
+    def sendRobotPaintingRadius(self, radius):
+        cmd = self.cmd.CUSTOM_ACTION + str("14") + self.cmd.DECOLLATOR_CHAR \
+            + self.cmd.PAINT_MIN_RADIUS + str(radius[0]) + self.cmd.DECOLLATOR_CHAR \
+            + self.cmd.PAINT_MAX_RADIUS + str(radius[1]) + "\r\n"
+        self.serverSend(cmd)
     #Get the IP address of the Raspberry PI
     def get_interface_ip(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -305,12 +312,10 @@ class ArmServer:
                                     self.robotFile.writeJsonObject("Arm State", self.armState)
                                 elif self.queueParser.commandArray[1] == self.cmd.AXIS_X_ACTION:         #Home point command S5
                                     self.homePoint = [self.queueParser.floatParameter[i] for i in range(1,4)]   
+                                    y_value = self.robotAction.calculate_y_value(self.homePoint[2])
+                                    self.sendRobotPaintingRadius(y_value)
                                     self.robotFile.writeJsonObject("Home point", self.homePoint)
-                                    cmd = self.cmd.MOVE_ACTION + str("0") + self.cmd.DECOLLATOR_CHAR \
-                                        + self.cmd.AXIS_X_ACTION + str(self.homePoint[0]) + self.cmd.DECOLLATOR_CHAR \
-                                        + self.cmd.AXIS_Y_ACTION + str(self.homePoint[1]) + self.cmd.DECOLLATOR_CHAR \
-                                        + self.cmd.AXIS_Z_ACTION + str(self.homePoint[2])
-                                    self.queueAction.put(cmd)
+                                    self.setRobotAction(self.homePoint)
                                     self.robotActionCheck = 12
                                     self.armState[3] = 1
                                     self.robotFile.writeJsonObject("Arm State", self.armState)
@@ -383,30 +388,43 @@ class ArmServer:
                         if self.cmd.AXIS_Z_ACTION in self.queueActionParser.commandArray:                           
                             z_index = self.queueActionParser.commandArray.index(self.cmd.AXIS_Z_ACTION)             
                             self.last_pozition[2] = self.queueActionParser.floatParameter[z_index]                      
-                        x = self.last_pozition[0]
-                        y = self.last_pozition[1]
-                        z = self.last_pozition[2]
-                        min_sphere = self.robotAction.is_point_inside_sphere(x,y,z,80)    #The motion range of the plane is limited to the radius of 80mm-270mm
-                        max_sphere = self.robotAction.is_point_inside_sphere(x,y,z,270)
-                        if (min_sphere == 1 or min_sphere == 2) and (max_sphere==0):    #Inside a large ball with a radius of 270mm and outside a ball with a radius of 80mm
-                            #The height limit is between -100 and 200mm
-                            #self.last_pozition[2] = self.robotAction.constrain(self.last_pozition[2], -100, 180)
-                            #Determine whether it passes through the central cylinder area
-                            data, circle_axis_1, circle_axis_2 = self.robotAction.calculate_valid_axis(self.robotAction.last_axis, self.last_pozition, 80)
-                            if data[0] == 1:                                                         #Existential intersection
-                                if data[1] == 2:                                                     #Two intersecting points are between a line segment formed by a starting point and an ending point
-                                    self.robotAction.moveStepMotorToTargetAxis(circle_axis_1)        
-                                    self.robotAction.moveStepMotorToTargetAxis(circle_axis_2, 2)        
-                                    self.robotAction.moveStepMotorToTargetAxis(self.last_pozition)   
-                                elif data[1] == 1:                                                   #There is a point of intersection between the line segments formed by the beginning and the end
-                                    self.robotAction.moveStepMotorToTargetAxis(circle_axis_1)        
-                                elif data[1] == 0:                                                   #The starting point is on the circle, and the end point is in the circle, which does not meet the conditions of movement
-                                    pass
-                            elif data[0] == 0:                                                       #Start and end are outside the circle, moving directly
-                                self.robotAction.moveStepMotorToTargetAxis(self.last_pozition)      
-                        else:
-                            print("min_sphere, max_sphere, self.last_pozition: ", min_sphere, max_sphere, self.last_pozition)
-                            self.setRobotBuzzer(2000,100,1)     
+                        try:
+                            target_angle = self.robotAction.coordinateToAngle(self.last_pozition)
+                            limitAngle = 180-target_angle[1]-target_angle[2]
+                            if self.robotAction.arm_limit_angle1[0] < limitAngle < self.robotAction.arm_limit_angle1[1]:
+                                if self.robotAction.arm_limit_angle2[0]< target_angle[1] < self.robotAction.arm_limit_angle2[1] and self.robotAction.arm_limit_angle3[0] < target_angle[2] < self.robotAction.arm_limit_angle3[1]:
+                                    data, circle_axis_1, circle_axis_2 = self.robotAction.calculate_valid_axis(self.robotAction.last_axis, self.last_pozition, 80)
+                                    if data[0] == 1:                                                         #Existential intersection
+                                        if data[1] == 2:                                                     #Two intersecting points are between a line segment formed by a starting point and an ending point
+                                            self.robotAction.moveStepMotorToTargetAxis(circle_axis_1)      
+                                            self.robotAction.moveStepMotorToTargetAxis(circle_axis_2, 1)   
+                                            self.robotAction.moveStepMotorToTargetAxis(self.last_pozition)   
+                                        elif data[1] == 1:                                                   #There is a point of intersection between the line segments formed by the beginning and the end
+                                            self.robotAction.moveStepMotorToTargetAxis(circle_axis_1)        
+                                        elif data[1] == 0:                                                   #The starting point is on the circle, and the end point is in the circle, which does not meet the conditions of movement
+                                            pass
+                                    elif data[0] == 0:                                                       #Start and end are outside the circle, moving directly
+                                        self.robotAction.moveStepMotorToTargetAxis(self.last_pozition)      
+                                    self.current_pozition = self.last_pozition.copy()
+                                else:
+                                    if self.robotAction.arm_limit_angle2[0]< target_angle[1] < self.robotAction.arm_limit_angle2[1]:
+                                        print("Motor 3 rotates to the limit Angle range.")
+                                        self.setRobotBuzzer(2000, 100, 1)
+                                    elif self.robotAction.arm_limit_angle3[0]< target_angle[2] < self.robotAction.arm_limit_angle3[1]:
+                                        print("Motor 2 rotates to the limit Angle range.")
+                                        self.setRobotBuzzer(2000, 100, 1)
+                            else:
+                                print("The structure does not allow execution to Angle2 and Angle3.")
+                                self.setRobotBuzzer(2000, 100, 2)
+                            '''
+                            cmd = self.cmd.MOVE_ACTION + str("0") + self.cmd.DECOLLATOR_CHAR \
+                                + self.cmd.AXIS_X_ACTION + str(self.current_pozition[0]) + self.cmd.DECOLLATOR_CHAR \
+                                + self.cmd.AXIS_Y_ACTION + str(self.current_pozition[1]) + self.cmd.DECOLLATOR_CHAR \
+                                + self.cmd.AXIS_Z_ACTION + str(self.current_pozition[2]) + "\r\n"
+                            self.serverSend(cmd)
+                            '''
+                        except:
+                            pass
                     elif self.queueActionParser.intParameter[0]==4:                                                     #G4
                         if self.cmd.DELAY_T_ACTION in self.queueActionParser.commandArray:                             
                             t_index = self.queueActionParser.commandArray.index(self.cmd.DELAY_T_ACTION)             
