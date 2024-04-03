@@ -29,6 +29,9 @@ class Command:
         self.ARM_CALIBRATION_END   = 'J'    
         self.ARM_QUERY =             'K'    
         self.ARM_STOP =              'N' 
+        self.PAINT_MIN_RADIUS =      'P'
+        self.PAINT_MAX_RADIUS =      'U'
+
 
         # G0 X0 Y200 Z75
         # G4 T150
