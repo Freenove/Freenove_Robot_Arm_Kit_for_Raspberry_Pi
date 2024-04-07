@@ -58,12 +58,17 @@ class Arm:
                         pass
                     else:
                         y_value[0] = 200 - y + 1
+                        break 
                 else:
                      y_value[0] = 200 - y + 1
                      break   
             except:
                 pass
-        for y in range(250,400,1):
+        if y_value[0]>100:
+            min_value = y_value[0]
+        else:
+            min_value = 100
+        for y in range(min_value,400,1):
             try:
                 axis = [0, y, z]
                 angle = self.coordinateToAngle(axis)
@@ -73,6 +78,7 @@ class Arm:
                         pass
                     else:
                         y_value[1] = y - 1
+                        break 
                 else:
                      y_value[1] = y - 1
                      break   
