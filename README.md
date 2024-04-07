@@ -3,7 +3,7 @@
 > A Robot Arm for Raspberry Pi
 
 
-<img src='Picture/icon.png' width='100%'/>
+<img src='Picture/FNK0036.jpg' width='100%'/>
 
 ### Download
 
