@@ -266,7 +266,6 @@ class ArmServer:
                 try:
                     self.receiveData = self.connection.recv(1024).decode('utf-8')
                 except:
-                    #如果没办法获取socket缓冲区数据，说明自身socket没开。
                         self.threadings_state = 1
                         print("main.py, The socket was disconnected.")
                         break
