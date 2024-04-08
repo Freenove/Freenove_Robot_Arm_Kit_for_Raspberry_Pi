@@ -22,8 +22,8 @@ from datetime import datetime
 import platform
 
 class myClientWindow(QMainWindow, Ui_Arm):
-    ui_arm_btn_connect = QtCore.pyqtSignal(str)   
-    threading_cmd = QtCore.pyqtSignal(str)      
+    ui_arm_btn_connect = QtCore.pyqtSignal(str)
+    threading_cmd = QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None):
         super(myClientWindow, self).__init__(parent)
@@ -196,20 +196,26 @@ class myClientWindow(QMainWindow, Ui_Arm):
                 self.ui_arm_btn_connect.emit("Connect")
                 break
             if self.client.data_queue.empty() is not True:
-                buf = self.client.data_queue.get()
-                self.message_parser.parser(buf)
-                if self.message_parser.commandArray[0] == self.cmd.CUSTOM_ACTION:  
-                    if self.message_parser.commandArray[1] == self.cmd.ARM_QUERY:
-                        if self.gcode_command.len() > 0: 
-                            self.arm_command_count = self.message_parser.intParameter[1]
-                            self.send_g_code_state = True  
-                        elif self.gcode_command.len() == 0: 
-                            self.arm_command_count = 0
-                            self.send_g_code_state = False
-                            cmd = self.cmd.CUSTOM_ACTION + str('12') + self.cmd.DECOLLATOR_CHAR + self.cmd.ARM_QUERY + str('0')
-                            self.threading_cmd.emit(cmd)
-                else:
-                    self.message_parser.clearParameters()
+                try:
+                    buf = self.client.data_queue.get()
+                    self.message_parser.parser(buf)
+                    if self.message_parser.commandArray[0] == self.cmd.CUSTOM_ACTION:
+                        if self.message_parser.commandArray[1] == self.cmd.ARM_QUERY:
+                            if self.gcode_command.len() > 0:
+                                self.arm_command_count = self.message_parser.intParameter[1]
+                                self.send_g_code_state = True
+                            elif self.gcode_command.len() == 0:
+                                self.arm_command_count = 0
+                                self.send_g_code_state = False
+                                cmd = self.cmd.CUSTOM_ACTION + str('12') + self.cmd.DECOLLATOR_CHAR + self.cmd.ARM_QUERY + str('0')
+                                self.threading_cmd.emit(cmd)
+                        else:
+                            print(self.message_parser.inputCommandArray)
+                    else:
+                        print(self.message_parser.inputCommandArray)
+                        self.message_parser.clearParameters()
+                except:
+                    pass
             else:
                 pass
 
@@ -596,12 +602,12 @@ class myClientWindow(QMainWindow, Ui_Arm):
     def set_img_action(self, index):
         if index.objectName() == "pushButton_Arm_Import_Picture": 
             try:
-                self.folder_path = self.filePath.getFilePath("./picture/*")  
+                self.folder_path = self.filePath.getFilePath("./picture/*")
                 if self.folder_path is not None:
                     print(self.folder_path)
                     white_image = self.white_image.copy() 
                     self.img_flag = 1
-                    img = cv2.imread(self.folder_path)  
+                    img = cv2.imdecode(np.fromfile(self.folder_path.encode('utf-8'), dtype=np.uint8), cv2.IMREAD_COLOR)
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  
                     img_h, img_w = img.shape[:2]
                     label_h = self.label_videl_size[1]
