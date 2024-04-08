@@ -34,7 +34,7 @@ class Arm:
         self.point_quadrant_2 = 1
         self.arm_limit_angle1 = [26, 150]
         self.arm_limit_angle2 = [0, 110]
-        self.arm_limit_angle3 = [-12, 98]
+        self.arm_limit_angle3 = [-12, 110]
     #mapping function
     def map(self, value, fromLow, fromHigh, toLow, toHigh):
         return ((toHigh-toLow)*(value-fromLow) / (fromHigh-fromLow) + toLow)
