@@ -461,12 +461,13 @@ class StepMotor:
                 self.pulse_margin[i] = pulse_count[i] + self.pulse_margin[i] - pulse_int_value[i]    
             else:                                                                                    
                 pulse_int_value[i] = round(pulse_count[i] - (self.pulse_margin[i]))                   
-                self.pulse_margin[i] = pulse_count[i] + self.pulse_margin[i] - pulse_int_value[i]    
+                self.pulse_margin[i] = pulse_count[i] - self.pulse_margin[i] - pulse_int_value[i]    
+        #print(pulse_count, pulse_int_value, direction, self.pulse_margin_dir, self.pulse_margin)
         self.pulse_margin_dir = direction.copy()                                                                                                                                                      
         buflist = pulse_count.copy()  
         buflist.sort(reverse=True)
         maxdata = buflist[0]
-        #print("stepmotor.py,", targetAngle, pulse_count, pulse_int_value, self.pulse_margin)
+        
         if maxdata != 0:
             self.motor1 = threading.Thread(target=self.motorRun, args=(1, direction[0], pulse_int_value[0], self.A4988ClkFrequency[0],))
             self.motor2 = threading.Thread(target=self.motorRun, args=(2, direction[1], pulse_int_value[1], self.A4988ClkFrequency[1],))
