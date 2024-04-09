@@ -360,7 +360,7 @@ class Arm:
             y_z = self.map(end_axis[1], self.plane_y_z[0], self.plane_y_z[1], self.plane_y_z[2], self.plane_y_z[3])  
         else:
             y_z = 0
-        self.current_z_offset = x_z + y_z                                                  
+        self.current_z_offset = x_z + y_z
         calculated = [(end_axis[i] - start_axis[i]) for i in range(3)]                      
         calculated_value = [0, 0, 0]
         calculated_value[0] = calculated[0] + self.current_x_offset - self.last_x_offset      
@@ -394,7 +394,7 @@ class Arm:
             for i in range(len(processing_axis)):
                 angle = self.coordinateToAngle(processing_axis[i])                           
                 angle1 = [(self.offsetAngle[i] + angle[i]) for i in range(3)]    # Deviation Angle calibration
-                self.armDriver.moveStepMotorToTargetAngle(angle1)                 
+                self.armDriver.moveStepMotorToTargetAngle(angle1) 
         self.last_x_offset = self.current_x_offset                                      
         self.last_y_offset = self.current_y_offset                                         
         self.last_z_offset = self.current_z_offset                                        
