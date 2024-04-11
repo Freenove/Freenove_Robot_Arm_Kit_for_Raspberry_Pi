@@ -18,7 +18,6 @@ class Arm:
         self.last_axis = self.angleToCoordinata(self.armDriver.zeroAngle)
         self.currentAngle = self.armDriver.lastAngle.copy()                
         self.armFrequency = 1000                                            
-        self.pulse_count_angle = 0
         self.offsetAngle = [0, 0, 0]                                                                             
         self.plane_x_z = [0,0,0,0]                                           
         self.plane_y_z = [0,0,0,0]                                          
@@ -290,14 +289,23 @@ class Arm:
     #Set the robot arm to calibrate the sensor center position
     def setArmToSensorPoint(self):
         pulse_count = self.armDriver.caliSensorPoint()
-        self.last_axis = self.angleToCoordinata(self.armDriver.lastAngle)
-        self.pulse_count_angle = 0
+        self.last_axis = self.angleToCoordinata(self.armDriver.lastAngle)  
+        tempFrequency= self.armFrequency[0]
+        self.setFrequency(1000)
+        angle1 = [(self.offsetAngle[i] + self.armDriver.lastAngle[i]) for i in range(3)]    # Deviation Angle calibration
+        self.armDriver.moveStepMotorToTargetAngle(angle1) 
+        self.setFrequency(tempFrequency)
         return pulse_count
     #Move the arm to the center of the sensor
     def setArmToSensorPointNoAdjust(self, pulse_count):
         self.armDriver.gotoSensorPoint(pulse_count)
         self.last_axis = self.angleToCoordinata(self.armDriver.lastAngle)
-        self.pulse_count_angle = 0
+        tempFrequency= self.armFrequency[0]
+        self.setFrequency(1000)
+        angle1 = [(self.offsetAngle[i] + self.armDriver.lastAngle[i]) for i in range(3)]    # Deviation Angle calibration
+        self.armDriver.moveStepMotorToTargetAngle(angle1) 
+        self.setFrequency(tempFrequency)
+
     #Set the stepper motor calibration offset Angle
     def setArmOffseAngle(self, offsetAngle):
         self.offsetAngle = offsetAngle.copy()
@@ -360,7 +368,8 @@ class Arm:
             y_z = self.map(end_axis[1], self.plane_y_z[0], self.plane_y_z[1], self.plane_y_z[2], self.plane_y_z[3])  
         else:
             y_z = 0
-        self.current_z_offset = x_z + y_z
+        #self.current_z_offset = round(x_z + y_z, 2)      
+        self.current_z_offset = x_z + y_z                                          
         calculated = [(end_axis[i] - start_axis[i]) for i in range(3)]                      
         calculated_value = [0, 0, 0]
         calculated_value[0] = calculated[0] + self.current_x_offset - self.last_x_offset      
