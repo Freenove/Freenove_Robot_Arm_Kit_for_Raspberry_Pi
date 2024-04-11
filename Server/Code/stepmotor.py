@@ -462,7 +462,7 @@ class StepMotor:
             else:                                                                                    
                 pulse_int_value[i] = round(pulse_count[i] - (self.pulse_margin[i]))                   
                 self.pulse_margin[i] = pulse_count[i] - self.pulse_margin[i] - pulse_int_value[i]    
-        #print(pulse_count, pulse_int_value, direction, self.pulse_margin_dir, self.pulse_margin)
+        #print("Stepmotor.py, ", pulse_count, pulse_int_value, direction, self.pulse_margin_dir, self.pulse_margin)
         self.pulse_margin_dir = direction.copy()                                                                                                                                                      
         buflist = pulse_count.copy()  
         buflist.sort(reverse=True)
