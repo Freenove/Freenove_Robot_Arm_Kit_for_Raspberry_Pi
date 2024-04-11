@@ -141,7 +141,7 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
             self.lineEdit_Parameter_Axis_Height.setText(str("0.0"))
             self.horizontalSlider_Parameter_Axis_Height.setValue(0)
             self.lineEdit_Parameter_Clamp_Length.setText(str("15.0"))
-            self.horizontalSlider_Parameter_Clamp_Length.setValue(230)
+            self.horizontalSlider_Parameter_Clamp_Length.setValue(150)
             self.lineEdit_Parameter_Clamp_Height.setText(str("45.0"))
             self.horizontalSlider_Parameter_Clamp_Height.setValue(450)
             self.lineEdit_Parameter_Pen_Height.setText(str("0.0"))
