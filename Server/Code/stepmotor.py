@@ -100,30 +100,30 @@ class StepMotor:
     def motorRun(self, motor_number, direction, pulse_count, pulse_frequency):
         if pulse_count == 0 or pulse_frequency == 0:
             return
-        turn_direction = direction
+        turn_dir = direction
         if self.turn_direction == 1:
             if direction == 1:
-                turn_direction = 0
+                turn_dir = 0
             elif direction == 0:
-                turn_direction = 1
+                turn_dir = 1
         pulse_period = 1 / pulse_frequency                      
         half_pulse_period = pulse_period / 2                          
         if motor_number == 1:                                        
-            self.MODULE_DIR_3.write(self.A4988_DIR[2], turn_direction)
+            self.MODULE_DIR_3.write(self.A4988_DIR[2], turn_dir)
             for i in range(pulse_count):
                 self.MODULE_STEP_3.write(self.A4988_STEP[2], 1)
                 self.myDelay(half_pulse_period)
                 self.MODULE_STEP_3.write(self.A4988_STEP[2], 0)
                 self.myDelay(half_pulse_period)   
         elif motor_number == 2:
-            self.MODULE_DIR_2.write(self.A4988_DIR[1], turn_direction)
+            self.MODULE_DIR_2.write(self.A4988_DIR[1], turn_dir)
             for i in range(pulse_count):
                 self.MODULE_STEP_2.write(self.A4988_STEP[1], 1)
                 self.myDelay(half_pulse_period)
                 self.MODULE_STEP_2.write(self.A4988_STEP[1], 0)
                 self.myDelay(half_pulse_period)   
         elif motor_number == 3:
-            self.MODULE_DIR_1.write(self.A4988_DIR[0], turn_direction)
+            self.MODULE_DIR_1.write(self.A4988_DIR[0], turn_dir)
             for i in range(pulse_count):                             
                 self.MODULE_STEP_1.write(self.A4988_STEP[0], 1)       
                 self.myDelay(half_pulse_period)                      
