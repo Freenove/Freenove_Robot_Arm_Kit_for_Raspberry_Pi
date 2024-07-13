@@ -616,7 +616,7 @@ class myClientWindow(QMainWindow, Ui_Arm):
                         picture_center = ((label_h - img_h) // 2, (label_w - img_w) // 2)  
                         white_image[picture_center[0]:picture_center[0] + img_h, picture_center[1]:picture_center[1] + img_w] = img
                     elif img_h > label_h or img_w > label_w: 
-                        scale = min(label_h / img_h, label_w / img_w)  
+                        scale = min((label_h-2) / img_h, (label_w-2) / img_w)
                         new_img_h = int(scale * img_h)
                         new_img_w = int(scale * img_w)
                         resized_img = cv2.resize(img, (new_img_w, new_img_h), interpolation=cv2.INTER_AREA)
@@ -668,8 +668,8 @@ class myClientWindow(QMainWindow, Ui_Arm):
                     img = self.binary_img.copy() 
                     self.contours_data = None  
                     self.hierarchy_data = None 
-                    # self.contours_data, self.hierarchy_data = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)   
-                    self.contours_data, self.hierarchy_data = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  
+                    #self.contours_data, self.hierarchy_data = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                    self.contours_data, self.hierarchy_data = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                     img1 = self.raw_img.copy()
                     img1 = np.zeros(shape=img.shape, dtype=np.uint8)  
                     img1 += 255  
@@ -868,8 +868,8 @@ class myClientWindow(QMainWindow, Ui_Arm):
                 if self.img_flag == 4:
                     self.contours_data = None 
                     self.hierarchy_data = None 
-                    # self.contours_data, self.hierarchy_data = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE) 
-                    self.contours_data, self.hierarchy_data = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)  
+                    #self.contours_data, self.hierarchy_data = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
+                    self.contours_data, self.hierarchy_data = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                     img1 = np.zeros(shape=img.shape, dtype=np.uint8) 
                     img1 += 255  
                     cv2.drawContours(img1, self.contours_data, -1, (0, 0, 0), 1)

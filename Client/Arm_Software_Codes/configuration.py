@@ -579,8 +579,8 @@ class Configuration(QtWidgets.QWidget, Ui_Parameter):
             self.lineEdit_Parameter_Arm_Frequency.setText(str(data * 50))
         elif index.objectName() == "pushButton_Parameter_Arm_Frequency_Add":
             data = self.horizontalSlider_Parameter_Arm_Frequency.value() + 1
-            if data > 320:
-                data = 320
+            if data > 80:
+                data = 80
             self.horizontalSlider_Parameter_Arm_Frequency.setValue(data)
             self.lineEdit_Parameter_Arm_Frequency.setText(str(data * 50))
 

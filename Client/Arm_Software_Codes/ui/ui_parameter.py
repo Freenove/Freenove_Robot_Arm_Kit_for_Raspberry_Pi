@@ -615,7 +615,7 @@ class Ui_Parameter(object):
         font.setFamily("3ds")
         self.horizontalSlider_Parameter_Arm_Frequency.setFont(font)
         self.horizontalSlider_Parameter_Arm_Frequency.setMinimum(1)
-        self.horizontalSlider_Parameter_Arm_Frequency.setMaximum(320)
+        self.horizontalSlider_Parameter_Arm_Frequency.setMaximum(80)
         self.horizontalSlider_Parameter_Arm_Frequency.setPageStep(1)
         self.horizontalSlider_Parameter_Arm_Frequency.setProperty("value", 20)
         self.horizontalSlider_Parameter_Arm_Frequency.setOrientation(QtCore.Qt.Horizontal)
