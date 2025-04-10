@@ -2,7 +2,7 @@
 FNK0036
 ######################################################
 
-这里放套件全称 
+Freenove Robot Arm Kit for Raspberry_Pi
 ******************************************************
 
 Download
@@ -10,7 +10,7 @@ Download
 
 Please download the full resources including code examples, datasheets, etc. first.
 
-`Click to download <这里填GitHub地址/archive/refs/heads/这里填分支.zip>`_
+`Click to download <https://github.com/Freenove/Freenove_Robot_Arm_Kit_for_Raspberry_Pi/archive/refs/heads/main.zip>`_
 
 Support
 ====================================================
