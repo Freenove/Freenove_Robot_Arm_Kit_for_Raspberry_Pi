@@ -1,32 +1,31 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-import pigpio
+from gpiozero import DigitalInputDevice  
 
 class TCRT5000: 
     def __init__(self):
         self.TCRT5000_PIN = [8,11,7]
-        self.tcrt5000 = pigpio.pi()
-        self.tcrt5000.set_mode(self.TCRT5000_PIN[0], pigpio.INPUT)
-        self.tcrt5000.set_mode(self.TCRT5000_PIN[1], pigpio.INPUT)
-        self.tcrt5000.set_mode(self.TCRT5000_PIN[2], pigpio.INPUT)
+        self.sensors = [DigitalInputDevice(pin, pull_up=False, bounce_time=1) for pin in self.TCRT5000_PIN] 
+
     def readTCRT5000S1(self):
-        return self.tcrt5000.read(self.TCRT5000_PIN[0])
+        return 1 if self.sensors[0].is_active else 0
     def readTCRT5000S2(self):
-        return self.tcrt5000.read(self.TCRT5000_PIN[1])
+        return 1 if self.sensors[1].is_active else 0
     def readTCRT5000S3(self):
-        return self.tcrt5000.read(self.TCRT5000_PIN[2])
+        return 1 if self.sensors[2].is_active else 0
     def readTCRT5000ALL(self):
         s1 = self.readTCRT5000S1()
         s2 = self.readTCRT5000S2()
         s3 = self.readTCRT5000S3()
         return [s1,s2,s3]
-        
+    
+    def stopTCRT5000ALL(self):
+        [self.sensors[i].close() for i in range(len(self.sensors))]
+    
 if __name__ == '__main__':
     import os
     import time
-    os.system("sudo pigpiod")
-    time.sleep(1)
     current_state = [0,0,0]
     sensor_count = [0,0,0]
     sensor = TCRT5000()

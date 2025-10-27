@@ -15,8 +15,12 @@ for x in range(1,4):
     if os.system("cd ./Libs/rpi-ws281x-python/library && sudo python3 setup.py install") == 0:
         flag=flag | 0x04
         break
-
-if flag==0x07:
+for x in range(1,4):
+    if os.system("cd ./Libs/pwm-pi5 && sudo python3 setup.py") == 0:
+        flag=flag | 0x08
+        break
+        
+if flag==0x0f:
         print("\nNow the installation is successful.")
         print("\nPlease restart raspberry pi")
 else:
@@ -26,6 +30,7 @@ else:
         print("\npigpio install failed.")
     if flag&0x04==0x00:
         print("\nrpi-ws281x-python install failed.")
-
+    if flag&0x08==0x00:
+        print("\npwm-pi5 install failed.")
     print ("\nSome libraries have not been installed yet. Please run 'sudo python setup.py' again")
 

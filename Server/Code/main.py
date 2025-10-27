@@ -15,11 +15,25 @@ import buzzer
 import servo
 import ledPixel
 
+def get_raspberry_pi_model():  
+    try:  
+        with open('/proc/cpuinfo', 'r') as f:  
+            cpuinfo = f.readlines()  
+        for line in cpuinfo:  
+            if line.startswith('Model'):  
+                model_info = line.strip().split(':')[-1].strip().split("Model")[0].strip()
+                return model_info  
+        return 'Unknown Raspberry Pi Model'  
+    except Exception as e:  
+        print(f"Error reading /proc/cpuinfo: {e}")  
+        return 'Error Reading' 
+     
 class ArmServer:
     def __init__(self):
         self.robotAction = arm.Arm()                                                                   #It's used to control a robotic arm
         self.robotServo = servo.Servo()                                                                #It's used to control servo
-        self.robotLed = ledPixel.LedPixel()                                                            #It's used to control ledpixel
+        if not get_raspberry_pi_model() == "Raspberry Pi 5":
+            self.robotLed = ledPixel.LedPixel()                                                            #It's used to control ledpixel
         self.robotBuzzer = buzzer.Buzzer()                                                             #It's used to control buzzer
         self.robotFile = messageRecord.MessageRecord()                                                 #Is used to read and write json data
         self.cmd = command.Command()                                                                   #Communication command
@@ -96,10 +110,12 @@ class ArmServer:
             buf_state = self.threadingLed.is_alive()
             if state != buf_state:
                 if state == True:
-                    self.threadingLed = messageThread.create_thread(self.threadingRobotLed)
-                    self.threadingLed.start()
+                    if not get_raspberry_pi_model() == "Raspberry Pi 5":
+                        self.threadingLed = messageThread.create_thread(self.threadingRobotLed)
+                        self.threadingLed.start()
                 elif state == False:
-                    messageThread.stop_thread(self.threadingLed)
+                    if not get_raspberry_pi_model() == "Raspberry Pi 5":
+                        messageThread.stop_thread(self.threadingLed)
         except:
             print("setThreadingLedState error.")
     #Set the buzzer thread
@@ -172,12 +188,14 @@ class ArmServer:
         print("main.py,", 'Server address: ' + SOCKET_IP)                                              #Print IP
         self.threadingReceive = messageThread.create_thread(self.threadingReceiveInstruction)          #Request a thread and assign a value to a variable
         self.threadingArm = messageThread.create_thread(self.threadingRobotAction)                     #Request a thread and assign a value to a variable程
-        self.threadingLed = messageThread.create_thread(self.threadingRobotLed)                        #Request a thread and assign a value to a variable
+        if not get_raspberry_pi_model() == "Raspberry Pi 5":
+            self.threadingLed = messageThread.create_thread(self.threadingRobotLed)                        #Request a thread and assign a value to a variable
         self.threadingBuzzer = messageThread.create_thread(self.threadingRobotBuzzer)                  #Request a thread and assign a value to a variable
         self.threadingActionFeedback = messageThread.create_thread(self.threadingRobotActionFeedback)  #Request a thread and assign a value to a variable 
         self.setThreadingReceiveState(True)                                                            #Start thread
         self.setThreadingArmState(True)                                                                #Start thread
-        self.setThreadingLedState(True)                                                                #Start thread
+        if not get_raspberry_pi_model() == "Raspberry Pi 5":
+            self.setThreadingLedState(True)                                                                #Start thread
         self.setThreadingBuzzerState(True)                                                             #Start thread
     #Disable the socket server
     def turn_off_server(self):
@@ -187,7 +205,8 @@ class ArmServer:
             self.setThreadingArmState(False) 
             self.setThreadingBuzzerState(False) 
             self.setThreadingFeedbackState(False)
-            self.setThreadingLedState(False) 
+            if not get_raspberry_pi_model() == "Raspberry Pi 5":
+                self.setThreadingLedState(False) 
             self.connection.close()
         except:
             print("Turn off server failed.")
@@ -415,13 +434,6 @@ class ArmServer:
                             else:
                                 print("The structure does not allow execution to Angle2 and Angle3.")
                                 self.setRobotBuzzer(2000, 100, 2)
-                            '''
-                            cmd = self.cmd.MOVE_ACTION + str("0") + self.cmd.DECOLLATOR_CHAR \
-                                + self.cmd.AXIS_X_ACTION + str(self.current_pozition[0]) + self.cmd.DECOLLATOR_CHAR \
-                                + self.cmd.AXIS_Y_ACTION + str(self.current_pozition[1]) + self.cmd.DECOLLATOR_CHAR \
-                                + self.cmd.AXIS_Z_ACTION + str(self.current_pozition[2]) + "\r\n"
-                            self.serverSend(cmd)
-                            '''
                         except:
                             pass
                     elif self.queueActionParser.intParameter[0]==4:                                                     #G4
@@ -657,7 +669,7 @@ class ArmServer:
                         index = self.queueActionParser.intParameter[1]
                         original_angle = self.queueActionParser.intParameter[2]
                         range_angle = self.robotAction.constrain(original_angle, 0, 150)
-                        offset_angle = self.robotAction.map(range_angle, 0, 150, 15, 165)
+                        offset_angle = self.robotAction.map(range_angle, 0, 150, 10, 160)
                         self.robotServo.setServoAngle(index, offset_angle)
     #Light thread
     def threadingRobotLed(self):
@@ -667,7 +679,8 @@ class ArmServer:
                 self.queueLed.clear()
                 self.queueLedParser.parser(data)
                 self.thread_led_parameter = self.queueLedParser.intParameter[1:5]
-            self.robotLed.light(self.thread_led_parameter)
+            if not get_raspberry_pi_model() == "Raspberry Pi 5":
+                self.robotLed.light(self.thread_led_parameter)
     #Buzzer thread
     def threadingRobotBuzzer(self):
         while True:
@@ -713,9 +726,8 @@ class ArmServer:
         print("main.py, The robot arm stops running, please press ctrl+c to exit.")
        
 if __name__ == '__main__':
-    import os
-    os.system("sudo pigpiod")
-    time.sleep(1)
+    if get_raspberry_pi_model() == "Raspberry Pi 5":
+        print("rpi_ws281x is temporarily unable to run on Raspberry PI 5, so ledpixel is not supported.")
     arm = ArmServer()
     try:
         print("Please use your computer or mobile phone to connect the robot arm.")

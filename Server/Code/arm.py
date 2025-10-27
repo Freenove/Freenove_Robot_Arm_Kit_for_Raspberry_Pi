@@ -411,7 +411,6 @@ class Arm:
 if __name__ == '__main__':
     import os
     import time
-    os.system("sudo pigpiod")
     time.sleep(1)
     arm = Arm() 
     arm.setArmEnable(0)

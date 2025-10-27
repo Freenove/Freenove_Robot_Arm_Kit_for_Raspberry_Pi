@@ -1,29 +1,25 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
-import pigpio
-import time
-
+from gpiozero import PWMOutputDevice  
+import time  
+  
 class Buzzer:
     def __init__(self):
         self.BUZZER_PIN = 21
-        self.PwmBuzzer = pigpio.pi()
-        self.initBuzzer()
-    
-    def initBuzzer(self):
-        self.PwmBuzzer.set_mode(self.BUZZER_PIN, pigpio.OUTPUT) 
-        self.PwmBuzzer.set_PWM_frequency(self.BUZZER_PIN, 2000)
-        self.PwmBuzzer.set_PWM_range(self.BUZZER_PIN, 100)
-        self.PwmBuzzer.set_PWM_dutycycle(self.BUZZER_PIN, 0)
+        self.buzzer = PWMOutputDevice(self.BUZZER_PIN, initial_value=0)  
 
     def buzzerRun(self, frequency=2000):
         if frequency != 0:
-            self.PwmBuzzer.set_PWM_dutycycle(self.BUZZER_PIN, 50)
-            self.PwmBuzzer.set_PWM_frequency(self.BUZZER_PIN, frequency)
+            self.buzzer.value = 0.3       
+            self.buzzer.frequency = frequency
         else:
-            self.PwmBuzzer.set_PWM_dutycycle(self.BUZZER_PIN, 0)
-            self.PwmBuzzer.set_PWM_frequency(self.BUZZER_PIN, 0)
-            
+            self.buzzer.off()  
+    
+    def buzzerClose(self):
+        self.buzzer.off()  
+        self.buzzer.close() 
+
     def buzzerRunXms(self, frequency=2000, delayms=100, times=1):
         for i in range(times):
             self.buzzerRun(frequency)
@@ -31,13 +27,11 @@ class Buzzer:
             self.buzzerRun(0)
             time.sleep(float(delayms/1000))
         self.buzzerRun(0)
-            
-
+  
 # Main program logic follows:
 if __name__ == '__main__':
     import os
     import sys
-    os.system("sudo pigpiod")
     time.sleep(1)
     B=Buzzer() 
     try:
@@ -53,5 +47,4 @@ if __name__ == '__main__':
             print("Too many parameters.")
             B.buzzerRunXms(1000,300,2)  
     except KeyboardInterrupt:
-        B.buzzerRun(0)
-        print('quit')
+        B.buzzerClose()
