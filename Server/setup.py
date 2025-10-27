@@ -8,7 +8,7 @@ for x in range(1,4):
         flag=flag | 0x01
         break
 for x in range(1,4):
-    if os.system("sudo apt-get install pigpio") == 0:
+    if os.system("sudo apt-get install python3-pigpio") == 0:
         flag=flag | 0x02
         break     
 for x in range(1,4):
