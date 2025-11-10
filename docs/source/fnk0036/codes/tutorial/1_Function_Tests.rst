@@ -626,7 +626,7 @@ Please run the following commands to install the library. If you have installed 
 .. code-block:: console
 
     cd ~
-    cd Freenove_Robot_Arm_Kit_for_Raspberry_Pi/Code
+    cd Freenove_Robot_Arm_Kit_for_Raspberry_Pi/Server
     sudo python setup.py
 
 .. image:: ../_static/imgs/1_Function_Tests/Function65.png
