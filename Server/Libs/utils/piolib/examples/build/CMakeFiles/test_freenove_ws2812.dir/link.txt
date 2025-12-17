@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra -Werror -Wl,--dependency-file=CMakeFiles/test_freenove_ws2812.dir/link.d CMakeFiles/test_freenove_ws2812.dir/test_freenove_ws2812.c.o -o test_freenove_ws2812  -Wl,-rpath,/home/pi/utils/piolib/examples/build libfreenove_ws2812_lib.so -lpio

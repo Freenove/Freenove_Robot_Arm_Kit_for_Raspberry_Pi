@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra -Werror -Wl,--dependency-file=CMakeFiles/test_freenove_pwm.dir/link.d CMakeFiles/test_freenove_pwm.dir/test_freenove_pwm.c.o -o test_freenove_pwm  -Wl,-rpath,/home/pi/utils/piolib/examples/build libfreenove_pwm_lib.so -lpio

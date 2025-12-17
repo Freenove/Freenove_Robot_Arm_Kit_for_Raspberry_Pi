@@ -1,0 +1,2 @@
+/usr/local/lib/libfreenove_ws2812_lib.so
+/usr/local/lib/libfreenove_pwm_lib.so

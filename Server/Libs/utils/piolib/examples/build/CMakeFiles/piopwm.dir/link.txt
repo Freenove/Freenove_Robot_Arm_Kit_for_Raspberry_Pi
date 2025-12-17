@@ -1,0 +1,1 @@
+/usr/bin/cc  -Wall -Wextra -Werror -Wl,--dependency-file=CMakeFiles/piopwm.dir/link.d CMakeFiles/piopwm.dir/pwm.c.o -o piopwm  -lpio

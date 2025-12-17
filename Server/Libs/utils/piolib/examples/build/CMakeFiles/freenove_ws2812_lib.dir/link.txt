@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC  -Wall -Wextra -Werror -Wl,--dependency-file=CMakeFiles/freenove_ws2812_lib.dir/link.d -shared -Wl,-soname,libfreenove_ws2812_lib.so -o libfreenove_ws2812_lib.so CMakeFiles/freenove_ws2812_lib.dir/freenove_ws2812.c.o  -lpio

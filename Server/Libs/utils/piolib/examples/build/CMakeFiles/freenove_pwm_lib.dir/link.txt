@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC  -Wall -Wextra -Werror -Wl,--dependency-file=CMakeFiles/freenove_pwm_lib.dir/link.d -shared -Wl,-soname,libfreenove_pwm_lib.so -o libfreenove_pwm_lib.so CMakeFiles/freenove_pwm_lib.dir/freenove_pwm.c.o  -lpio
