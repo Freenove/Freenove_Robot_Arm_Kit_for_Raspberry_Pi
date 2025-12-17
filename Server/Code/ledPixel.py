@@ -2,176 +2,295 @@
 #!/usr/bin/env python
 
 import time
-from rpi_ws281x import *
 
-# Define functions which animate LEDs in various ways.
+def get_raspberry_pi_model():  
+    try:  
+        with open('/proc/cpuinfo', 'r') as f:  
+            cpuinfo = f.readlines()  
+        for line in cpuinfo:  
+            if line.startswith('Model'):  
+                model_info = line.strip().split(':')[-1].strip().split("Model")[0].strip()
+                return model_info  
+        return 'Unknown Raspberry Pi Model'  
+    except Exception as e:  
+        print(f"Error reading /proc/cpuinfo: {e}")  
+        return 'Error Reading' 
+
+pi_model = get_raspberry_pi_model()
+if "Pi 5" in pi_model:
+    from piolib_ws2812 import WS2812
+    library_type = "piolib"
+else:
+    from rpilib_ws2812 import WS2812
+    library_type = "rpilib"
+
 class LedPixel:
     def __init__(self):
-        self.LedMod= 0
-        self.color=[0,0,0]
-        #Control the sending order of color data
-        self.ORDER = "RGB"  
-        # LED strip configuration:
-        LED_COUNT      = 8       # Number of LED pixels.
-        LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
-        LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
-        LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
-        LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
-        LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
-        LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
         # Create NeoPixel object with appropriate configuration.
-        self.strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
-        # Intialize the library (must be called once before other functions).
-        self.strip.begin()
-    
-    #Returns the correct color data based on the color type
-    def LED_TYPR(self, R, G, B):
-        Led_type = ["GRB", "GBR", "RGB", "RBG", "BRG", "BGR"]
-        color = [Color(G, R, B), Color(G, B, R), Color(R, G, B), Color(R, B, G), Color(B, R, G), Color(B, G, R)]
-        if self.ORDER in Led_type:
-            return color[Led_type.index(self.ORDER)]
-            
-    #Set the lights one by one and display
-    def colorWipe(self, color, wait_ms=50, interval_ms=1000):
-        self.strip.setBrightness(255)
-        colorShow = self.LED_TYPR(color[0], color[1], color[2])
-        for i in range(self.strip.numPixels()):
-            self.strip.setPixelColor(i, colorShow)
-            self.strip.show()
-            time.sleep(wait_ms/1000.0)
-        time.sleep(interval_ms/1000.0)
-
-    #Custom RGB
-    def RGBLed(self, color, wait_ms=100):
-        self.strip.setBrightness(255)
-        colorShow = self.LED_TYPR(color[0], color[1], color[2])
-        for i in range(8):
-            self.strip.setPixelColor(i, colorShow)
-        self.strip.show()
-        time.sleep(wait_ms/1000.0)
-
-    #Following lights
-    def followingLed(self, color, wait_ms=60):
-        self.strip.setBrightness(255)
-        ledShow = [self.LED_TYPR(color[0]//8, color[1]//8, color[2]//8), 
-               self.LED_TYPR(color[0]//4, color[1]//4, color[2]//4), 
-               self.LED_TYPR(color[0]//2, color[1]//2, color[2]//2),
-               self.LED_TYPR(color[0]//1, color[1]//1, color[2]//1)]
-        ledNum = self.strip.numPixels()
-        for z in range(ledNum):
-            for i in range(ledNum):
-                self.strip.setPixelColor(i, Color(0,0,0))
-            for j in range(len(ledShow)):
-                self.strip.setPixelColor((z+j)%ledNum, ledShow[j])
-            self.strip.show()
-            time.sleep(wait_ms/1000.0)
-
-    #Blink lights
-    def blinkLed(self, color, wait_ms=300):
-        self.strip.setBrightness(255)
-        colorShow = self.LED_TYPR(color[0], color[1], color[2])
-        for i in range(8):
-            self.strip.setPixelColor(i, colorShow)
-        self.strip.show()
-        time.sleep(wait_ms/1000.0)
-        for i in range(8):
-            self.strip.setPixelColor(i, Color(0, 0, 0))
-        self.strip.show()
-        time.sleep(wait_ms/1000.0)
+        if library_type == "piolib":
+            self.strip = WS2812(led_pin=18, led_count=8, order="GRB")
+        else: 
+            self.strip = WS2812(led_pin=18, led_count=8, order="RGB")
         
-    #Breathing lights      
-    def breathLight(self, color, wait_ms=15):
-        colorShow = self.LED_TYPR(color[0], color[1], color[2])
-        for i in range(8):
-            self.strip.setPixelColor(i, colorShow)
-        for i in range(100):
-            self.strip.setBrightness(i)
-            self.strip.show()
-            time.sleep(wait_ms/1000.0)
-        for i in range(100):
-            self.strip.setBrightness(100-i)
-            self.strip.show()
-            time.sleep(wait_ms/1000.0)
+        self.animation_states = {}
+        self.last_update_time = {}
     
-    #Color palette
-    def wheel(self, pos):
-        """Generate rainbow colors across 0-255 positions."""
-        if pos<0 or pos >255:
-            r=g=b=0
-        elif pos < 85:
-            r=pos * 3
-            g=255 - pos * 3
-            b=0
-        elif pos < 170:
-            pos -= 85
-            r=255 - pos * 3
-            g=0
-            b=pos * 3
+    # Set the lights one by one and display
+    def colorWipe(self, color, wait_ms=50, interval_ms=1000):
+        if 'colorWipe' not in self.animation_states:
+            self.animation_states['colorWipe'] = {
+                'step': 0,
+                'phase': 0,  # 0: wiping, 1: interval waiting
+                'start_time': time.time()
+            }
+        state = self.animation_states['colorWipe']
+        current_time = time.time()
+        if state['phase'] == 0:  # wiping phase
+            if (current_time - state['start_time']) * 1000 >= wait_ms:
+                if state['step'] < self.strip.numPixels():
+                    self.strip.setBrightness(255)
+                    self.strip.setPixelColor(state['step'], (color[0], color[1], color[2]))
+                    self.strip.show()
+                    state['step'] += 1
+                    state['start_time'] = current_time
+                    return True
+                else:
+                    # Wiping complete, move to interval phase
+                    state['phase'] = 1
+                    state['start_time'] = current_time
+                    return True
+        else:  # interval waiting phase
+            if (current_time - state['start_time']) * 1000 >= interval_ms:
+                # Interval complete, reset for next use
+                if 'colorWipe' in self.animation_states:
+                    del self.animation_states['colorWipe']
+                return False
+        return True
+
+    # Custom RGB
+    def RGBLed(self, color, wait_ms=100):
+        if 'RGBLed' not in self.animation_states:
+            self.animation_states['RGBLed'] = {
+                'started': False,
+                'start_time': time.time()
+            }
+        state = self.animation_states['RGBLed']
+        current_time = time.time()
+        if not state['started']:
+            self.strip.setBrightness(255)
+            for i in range(self.strip.numPixels()):
+                self.strip.setPixelColor(i, (color[0], color[1], color[2]))
+            self.strip.show()
+            state['started'] = True
+            state['start_time'] = current_time
+            return True
         else:
-            pos -= 170
-            r=0
-            g=pos * 3
-            b=255 - pos * 3
-        return self.LED_TYPR(r,g,b)
+            if (current_time - state['start_time']) * 1000 >= wait_ms:
+                # Display time complete, remove state
+                if 'RGBLed' in self.animation_states:
+                    del self.animation_states['RGBLed']
+                return False
+        return True
 
-    #Rainbow light
-    def rainbowCycle(self, wait_ms=3, iterations=1):
-        self.strip.setBrightness(50)
-        """Draw rainbow that uniformly distributes itself across all pixels."""
-        for j in range(256*iterations):
-            for i in range(self.strip.numPixels()):
-                self.strip.setPixelColor(i, self.wheel((int(i * 256 / self.strip.numPixels()) + j) & 255))
-            self.strip.show()
-            time.sleep(wait_ms/1000.0)
-
-    #Gradient rainbow light
-    def gradualChange(self, wait_ms=10, iterations=1):
-        self.strip.setBrightness(50)
-        """Draw rainbow that fades across all pixels at once."""
-        for j in range(256*iterations):
-            for i in range(self.strip.numPixels()):
-                 self.strip.setPixelColor(i, self.wheel((i+j) & 255))
-            self.strip.show()
-            time.sleep(wait_ms/1000.0)
-
-    #Rotating lights can be customed
-    def rotateLed(self, color, number=2, wait_ms=50):
-        self.strip.setBrightness(255)
-        colorShow = self.LED_TYPR(color[0], color[1], color[2])
-        ledNum = self.strip.numPixels()
-        for z in range(ledNum):
+    # Following lights
+    def followingLed(self, color, wait_ms=60):
+        if 'followingLed' not in self.animation_states:
+            self.animation_states['followingLed'] = {
+                'step': 0,
+                'start_time': time.time()
+            }
+        state = self.animation_states['followingLed']
+        current_time = time.time()
+        if (current_time - state['start_time']) * 1000 >= wait_ms:
+            self.strip.setBrightness(255)
+            ledShow = [(color[0]//8, color[1]//8, color[2]//8),
+                    (color[0]//4, color[1]//4, color[2]//4),
+                    (color[0]//2, color[1]//2, color[2]//2),
+                    (color[0]//1, color[1]//1, color[2]//1)]
+            ledNum = self.strip.numPixels()
+            state['step'] = state['step'] % ledNum
             for i in range(ledNum):
-                self.strip.setPixelColor(i, Color(0,0,0))
-            for j in range(number):
-                self.strip.setPixelColor((z+j*(ledNum//number))%ledNum, colorShow)
+                self.strip.setPixelColor(i, (0, 0, 0))
+            for j in range(len(ledShow)):
+                idx = (state['step'] + j) % ledNum
+                self.strip.setPixelColor(idx, ledShow[j])
             self.strip.show()
-            time.sleep(wait_ms/1000.0)
+            state['step'] += 1
+            state['start_time'] = current_time
+            return True
+        return True
+
+    # Blink lights
+    def blinkLed(self, color, wait_ms=300):
+        if 'blinkLed' not in self.animation_states:
+            self.animation_states['blinkLed'] = {
+                'step': 0,
+                'start_time': time.time()
+            }
+        
+        state = self.animation_states['blinkLed']
+        current_time = time.time()
+        
+        if (current_time - state['start_time']) * 1000 >= wait_ms:
+            self.strip.setBrightness(255)
+            ledNum = self.strip.numPixels()
+            
+            if state['step'] == 0:
+                for i in range(ledNum):
+                    self.strip.setPixelColor(i, (color[0], color[1], color[2]))
+                self.strip.show()
+                state['step'] = 1
+                state['start_time'] = current_time
+                return True
+            else:
+                for i in range(ledNum):
+                    self.strip.setPixelColor(i, (0, 0, 0))
+                self.strip.show()
+                state['step'] = 0
+                state['start_time'] = current_time
+        return True
+        
+    # Breathing lights      
+    def breathLight(self, color, wait_ms=15):
+        if 'breathLight' not in self.animation_states:
+            self.animation_states['breathLight'] = {
+                'step': 0,
+                'direction': 1,
+                'start_time': time.time()
+            }
+            
+        for i in range(self.strip.numPixels()):
+            self.strip.setPixelColor(i, (color[0], color[1], color[2]))
+        
+        state = self.animation_states['breathLight']
+        current_time = time.time()
+        
+        if (current_time - state['start_time']) * 1000 >= wait_ms:
+            if state['direction'] == 1:  
+                if state['step'] < 100:
+                    self.strip.setBrightness(state['step'])
+                    self.strip.show()
+                    state['step'] += 1
+                    state['start_time'] = current_time
+                    return True
+                else:
+                    state['direction'] = -1  
+                    state['step'] = 100
+            else: 
+                if state['step'] > 0:
+                    self.strip.setBrightness(state['step'])
+                    self.strip.show()
+                    state['step'] -= 1
+                    state['start_time'] = current_time
+                    return True
+                else:
+                    state['direction'] = 1
+                    state['step'] = 0
+            state['start_time'] = current_time
+        return True
     
-    #The colored light displays the function, which needs to be executed using a thread loop. data contains four parameters, 0:mode, 1:R, 2:G, and 3:B
+    # Rainbow light
+    def rainbowCycle(self, wait_ms=3, iterations=1):
+        if 'rainbowCycle' not in self.animation_states:
+            self.animation_states['rainbowCycle'] = {
+                'step': 0,
+                'max_steps': 256 * iterations,
+                'start_time': time.time()
+            }
+        state = self.animation_states['rainbowCycle']
+        current_time = time.time()
+        if (current_time - state['start_time']) * 1000 >= wait_ms:
+            if state['step'] < state['max_steps']:
+                self.strip.setBrightness(50)
+                for i in range(self.strip.numPixels()):
+                    color = self.strip.wheel((int(i * 256 / self.strip.numPixels()) + state['step']) & 255)
+                    self.strip.setPixelColor(i, color)
+                self.strip.show()
+                
+                state['step'] += 1
+                state['start_time'] = current_time
+                return True
+            else:
+                state['step'] = 0
+                state['start_time'] = current_time
+        return True
+
+    # Gradient rainbow light
+    def gradualChange(self, wait_ms=10, iterations=1):
+        if 'gradualChange' not in self.animation_states:
+            self.animation_states['gradualChange'] = {
+                'step': 0,
+                'max_steps': 256 * iterations,
+                'start_time': time.time()
+            }
+        state = self.animation_states['gradualChange']
+        current_time = time.time()
+        
+        if (current_time - state['start_time']) * 1000 >= wait_ms:
+            if state['step'] < state['max_steps']:
+                self.strip.setBrightness(50)
+                for i in range(self.strip.numPixels()):
+                    color = self.strip.wheel((i + state['step']) & 255)
+                    self.strip.setPixelColor(i, color)
+                self.strip.show()
+                
+                state['step'] += 1
+                state['start_time'] = current_time
+                return True
+            else:
+                state['step'] = 0
+                state['start_time'] = current_time
+        
+        return True
+
+    # Rotating lights can be customed
+    def rotateLed(self, color, number=2, wait_ms=50):
+        if 'rotateLed' not in self.animation_states:
+            self.animation_states['rotateLed'] = {
+                'step': 0,
+                'start_time': time.time()
+            }
+        state = self.animation_states['rotateLed']
+        current_time = time.time()
+        if (current_time - state['start_time']) * 1000 >= wait_ms:
+            self.strip.setBrightness(255)
+            ledNum = self.strip.numPixels()
+            state['step'] = state['step'] % ledNum
+            for i in range(ledNum):
+                self.strip.setPixelColor(i, (0, 0, 0))
+            for j in range(number):
+                idx = (state['step'] + j * (ledNum // number)) % ledNum
+                self.strip.setPixelColor(idx, (color[0], color[1], color[2]))
+            self.strip.show()
+            state['step'] += 1
+            state['start_time'] = current_time
+            return True
+        return True
+    
+    # The colored light displays the function, which needs to be executed using a thread loop. data contains four parameters, 0:mode, 1:R, 2:G, and 3:B
     def light(self, data):
-        self.LedMod=data[0]
-        for i in range(3):
-            self.color[i]=int(data[i+1]%256)
-        if self.LedMod==0:                                                    #close
-            self.color = [0,0,0]
+        self.LedMod = data[0]
+        self.color = data[1:4]
+        if self.LedMod == 0:                                                    # close
+            self.color = [0, 0, 0]
             self.colorWipe(self.color)
-        elif self.LedMod==1:                                                  #RGB
+        elif self.LedMod == 1:                                                  # RGB
             self.RGBLed(self.color)
-        elif self.LedMod==2:                                                  #Following
+        elif self.LedMod == 2:                                                  # Following
             self.followingLed(self.color)
-        elif self.LedMod==3:                                                  #Blink
+        elif self.LedMod == 3:                                                  # Blink
             self.blinkLed(self.color)
-        elif self.LedMod==4:                                                  #Breathing
+        elif self.LedMod == 4:                                                  # Breathing
             self.breathLight(self.color)
-        elif self.LedMod==5:                                                  #Rainbow
+        elif self.LedMod == 5:                                                  # Rainbow
             self.rainbowCycle()
-        elif self.LedMod==6:                                                  #Gradual
+        elif self.LedMod == 6:                                                  # Gradual
             self.gradualChange()
-        elif self.LedMod==7:                                                  #The two lights rotate symmetrically
+        elif self.LedMod == 7:                                                  # The two lights rotate symmetrically
             self.rotateLed(self.color, 2, 50)
-        elif self.LedMod==8:                                                  #The four lights rotate symmetrically
+        elif self.LedMod == 8:                                                  # The four lights rotate symmetrically
             self.rotateLed(self.color, 4, 100)                                   
-        elif self.LedMod>=9 or self.LedMod < 0:
+        elif self.LedMod >= 9 or self.LedMod < 0:
             self.LedMod = 0
             print("parameter error! Press Ctrl+c to exit and re-enter the parameters, please.")
             time.sleep(1)
@@ -180,18 +299,18 @@ class LedPixel:
 if __name__ == '__main__':
     import sys
     
-    led=LedPixel()   
+    led = LedPixel()   
     led.strip.setBrightness(255)
     print ('Program is starting ... ')
-    col=[Color(255,0,0), Color(0,255,0), Color(0,0,255)]
+    
     try:
-        if len(sys.argv)<5 and len(sys.argv)>=2:
+        if len(sys.argv) < 5 and len(sys.argv) >= 2:
             strParameter = sys.argv[1:]
             intParameter = [int(strParameter[i]) for i in range(len(strParameter))]
             parameter = [intParameter[0], 128, 0, 0]
             while True:
                 led.light(parameter)
-        elif len(sys.argv)<2:
+        elif len(sys.argv) < 2:
             print("Enter a parameter, 'sudo python ledPixel.py 1 0 0 255'")
             print("or 'sudo python ledPixel.py 1'")
         else:
@@ -202,6 +321,5 @@ if __name__ == '__main__':
                 
     except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be  executed.
         for i in range(8):
-            led.strip.setPixelColor(i, Color(0, 0, 0))
+            led.strip.setPixelColor(i, (0, 0, 0))
         led.strip.show()
-        
